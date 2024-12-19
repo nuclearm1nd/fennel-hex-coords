@@ -1,5 +1,15 @@
-(local coord-meta {})
 (local coord-index {})
+(local coord-proxy {})
+
+(local coord-meta
+  {:__index
+     (fn [t k]
+       (-?> coord-proxy
+            (. t)
+            (. k)))
+   :__newindex
+     (fn []
+       (error "attempt to update a coordinate" 2))})
 
 (lambda get-or-add! [q r]
   (if (not (. coord-index q))
@@ -8,9 +18,11 @@
         crd (. inner r)]
     (if (~= nil crd)
       crd
-      (let [new-crd [q r]]
-        (setmetatable new-crd coord-meta)
+      (let [proxy [q r]
+            new-crd {}]
         (tset inner r new-crd)
+        (tset coord-proxy new-crd proxy)
+        (setmetatable new-crd coord-meta)
         new-crd))))
 
 (lambda new [t ?r]
