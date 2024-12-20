@@ -43,4 +43,51 @@
           (get-or-add! t ?r))
       _ (error ("Bad arguments to new coordinate")))))
 
-{: new}
+(local idiv
+  #(math.floor (/ $1 $2)))
+
+(lambda to-axial [[x y] ?origin]
+  (let [[x0 y0] (or ?origin [0 0])
+        q (- x x0)]
+    (new
+      [q
+       (-> y (- y0) (+ (idiv q 2)))])))
+
+(lambda to-oddq [[q r] ?origin]
+  (let [[q0 r0] (or ?origin [0 0])
+        x (- q q0)]
+    (new
+      [x
+       (- r r0 (idiv x 2))])))
+
+(lambda to-new-origin [[q r] [qo ro]]
+  (new
+    [(- q qo)
+     (- r ro)]))
+
+(lambda symmetric [[q r] ?origin]
+  (if (not ?origin)
+    (new [(- q) (- r)])
+    (let [[qo ro] ?origin]
+      (-> [q r]
+          (to-new-origin [qo ro])
+          symmetric
+          (to-new-origin [(- qo) (- ro)])))))
+
+(lambda distance [[q0 r0] ?crd1]
+  (let [[q1 r1] (or ?crd1 [0 0])
+        q (- q0 q1)
+        r (- r0 r1)]
+    (idiv (+ (math.abs q)
+             (math.abs r)
+             (math.abs (- q r)))
+          2)))
+
+{
+ : new
+ : to-axial
+ : to-oddq
+ : to-new-origin
+ : symmetric
+ : distance
+ }
