@@ -2,6 +2,8 @@
   {: idiv
    } (require :generic.math))
 
+(local Set (require :generic.set))
+
 (local coord-index {})
 (local coord-proxy {})
 
@@ -13,7 +15,11 @@
             (. k)))
    :__newindex
      (fn []
-       (error "attempt to update a coordinate" 2))})
+       (error "attempt to update a coordinate" 2))
+   :__tostring
+     (fn [t]
+       (let [[q r] (. coord-proxy t)]
+         (.. "[" (tostring q) ";" (tostring r) "]")))})
 
 (lambda get-or-add! [q r]
   (if (not (. coord-index q))
@@ -84,6 +90,33 @@
              (math.abs (- q r)))
           2)))
 
+(lambda point-zone-factory [criterium [q r] ?distance]
+  (let [dist (or ?distance 1)
+        result (Set.new)]
+   (for [dq (- dist) dist 1]
+     (for [dr (- dist) dist 1]
+       (let [crd (new [(+ q dq) (+ r dr)])
+             dst (distance crd [q r])]
+         (when (criterium dist dst)
+           (result:add! crd)))))
+    result))
+
+(local neighbors
+  (partial point-zone-factory
+    (lambda [max-dist dist]
+      (and (> dist 0)
+           (<= dist max-dist)))))
+
+(local zone
+  (partial point-zone-factory
+    (lambda [max-dist dist]
+      (<= dist max-dist))))
+
+(lambda belt [min max crd]
+  (Set.difference
+    (zone crd max)
+    (zone crd min)))
+
 {
  : new
  : to-axial
@@ -91,4 +124,8 @@
  : to-new-origin
  : symmetric
  : distance
+ : point-zone-factory
+ : neighbors
+ : zone
+ : belt
  }

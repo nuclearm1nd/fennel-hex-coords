@@ -6,12 +6,19 @@
 (local lu (require :luaunit))
 
 (local
+  {: mapv
+   } (require :generic.list))
+
+(local
   {: new
    : to-axial
    : to-oddq
    : to-new-origin
    : symmetric
    : distance
+   : neighbors
+   : zone
+   : belt
    } (require :hex-coords.coord))
 
 (test NewValidation
@@ -92,6 +99,15 @@
           f (fn [[q r]] (+ q r))]
       (f crd))
     6
+))
+
+(test ToString
+  (to-test-pairs lu.assertEquals
+    (tostring (new [1 2]))
+    "[1;2]"
+
+    (tostring (new [-1 3]))
+    "[-1;3]"
 ))
 
 (test ToAxial
@@ -209,4 +225,86 @@
 
     (distance [1 2] [2 1])
     2
+))
+
+(test Neighbors
+  (to-test-pairs lu.assertEquals
+    (: (neighbors [1 2] 0) :to-array)
+    []
+
+    (: (neighbors [1 2]) :to-array)
+    (mapv #(new $1)
+      [[0 1] [1 1] [0 2] [2 2] [1 3] [2 3]])
+
+    (: (neighbors [1 2] 2) :to-array)
+    (mapv #(new $1)
+      [[-1 0]
+       [-1 1]
+       [-1 2]
+       [0 0]
+       [0 1]
+       [0 2]
+       [0 3]
+       [1 0]
+       [1 1]
+       [1 3]
+       [1 4]
+       [2 1]
+       [2 2]
+       [2 3]
+       [2 4]
+       [3 2]
+       [3 3]
+       [3 4]])
+))
+
+(test Zone
+  (to-test-pairs lu.assertEquals
+    (: (zone [1 2] 0) :to-array)
+    (mapv #(new $1)
+      [[1 2]])
+
+    (: (zone [1 2]) :to-array)
+    (mapv #(new $1)
+      [[1 2] [0 1] [1 1] [0 2] [2 2] [1 3] [2 3]])
+
+    (: (zone [1 2] 2) :to-array)
+    (mapv #(new $1)
+      [[1 2]
+       [-1 0]
+       [-1 1]
+       [-1 2]
+       [0 0]
+       [0 1]
+       [0 2]
+       [0 3]
+       [1 0]
+       [1 1]
+       [1 3]
+       [1 4]
+       [2 1]
+       [2 2]
+       [2 3]
+       [2 4]
+       [3 2]
+       [3 3]
+       [3 4]])
+))
+
+(test Belt
+  (to-test-pairs lu.assertEquals
+    (: (belt 1 2 [1 2]) :to-array)
+    (mapv #(new $1)
+      [[-1 0]
+       [-1 1]
+       [-1 2]
+       [0 0]
+       [1 0]
+       [0 3]
+       [1 4]
+       [2 1]
+       [2 4]
+       [3 2]
+       [3 3]
+       [3 4]])
 ))
