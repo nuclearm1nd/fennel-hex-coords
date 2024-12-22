@@ -2,6 +2,10 @@
   {: idiv
    } (require :generic.math))
 
+(local
+  {: mapv
+   } (require :generic.list))
+
 (local Set (require :generic.set))
 
 (local coord-index {})
@@ -52,6 +56,16 @@
             "expected a number in second position")
           (get-or-add! t ?r))
       _ (error ("Bad arguments to new coordinate")))))
+
+(lambda is-crd? [t]
+  (if (~= :table (type t))
+    false
+    (= coord-meta (getmetatable t))))
+
+(lambda coalesce [t]
+  (if (is-crd? t)
+    t
+    (new t)))
 
 (lambda to-axial [[x y] ?origin]
   (let [[x0 y0] (or ?origin [0 0])
@@ -117,8 +131,24 @@
     (zone crd max)
     (zone crd min)))
 
+(lambda collection-neighbors [collection ?distance]
+  (let [dist (or ?distance 1)
+        nhbrs (Set.new)
+        coll
+          (if (Set.is-set? collection)
+            collection
+            (->> collection
+                 (mapv #(coalesce $1))
+                 Set.to-set))]
+    (each [item (coll:iterator)]
+      (each [crd (: (neighbors item dist) :iterator)]
+        (nhbrs:add! crd)))
+    (nhbrs:difference! coll)))
+
 {
  : new
+ : is-crd?
+ : coalesce
  : to-axial
  : to-oddq
  : to-new-origin
@@ -128,4 +158,5 @@
  : neighbors
  : zone
  : belt
+ : collection-neighbors
  }

@@ -9,8 +9,12 @@
   {: mapv
    } (require :generic.list))
 
+(local Set (require :generic.set))
+
 (local
   {: new
+   : is-crd?
+   : coalesce
    : to-axial
    : to-oddq
    : to-new-origin
@@ -19,7 +23,14 @@
    : neighbors
    : zone
    : belt
+   : collection-neighbors
    } (require :hex-coords.coord))
+
+(lambda to-string-array [t]
+  (if (Set.is-set? t)
+    (icollect [item (t:iterator)]
+      (tostring item))
+    (mapv #(-> $1 coalesce tostring) t)))
 
 (test NewValidation
   (lu.assertError #(new 0))
@@ -108,6 +119,30 @@
 
     (tostring (new [-1 3]))
     "[-1;3]"
+))
+
+(test IsCrd
+  (to-test-pairs lu.assertEquals
+    (is-crd? 1)
+    false
+
+    (is-crd? :a)
+    false
+
+    (is-crd? [1 2])
+    false
+
+    (is-crd? (new 1 2))
+    true
+))
+
+(test Coalesce
+  (to-test-pairs lu.assertEquals
+    (coalesce [5 10])
+    (new 5 10)
+
+    (coalesce (new 15 20))
+    (new [15 20])
 ))
 
 (test ToAxial
@@ -228,16 +263,19 @@
 ))
 
 (test Neighbors
-  (to-test-pairs lu.assertEquals
-    (: (neighbors [1 2] 0) :to-array)
+  (to-test-pairs lu.assertItemsEquals
+    (to-string-array
+      (neighbors [1 2] 0))
     []
 
-    (: (neighbors [1 2]) :to-array)
-    (mapv #(new $1)
+    (to-string-array
+      (neighbors [1 2]))
+    (to-string-array
       [[0 1] [1 1] [0 2] [2 2] [1 3] [2 3]])
 
-    (: (neighbors [1 2] 2) :to-array)
-    (mapv #(new $1)
+    (to-string-array
+      (neighbors [1 2] 2))
+    (to-string-array
       [[-1 0]
        [-1 1]
        [-1 2]
@@ -259,17 +297,20 @@
 ))
 
 (test Zone
-  (to-test-pairs lu.assertEquals
-    (: (zone [1 2] 0) :to-array)
-    (mapv #(new $1)
+  (to-test-pairs lu.assertItemsEquals
+    (to-string-array
+      (zone [1 2] 0))
+    (to-string-array
       [[1 2]])
 
-    (: (zone [1 2]) :to-array)
-    (mapv #(new $1)
+    (to-string-array
+      (zone [1 2]))
+    (to-string-array
       [[1 2] [0 1] [1 1] [0 2] [2 2] [1 3] [2 3]])
 
-    (: (zone [1 2] 2) :to-array)
-    (mapv #(new $1)
+    (to-string-array
+      (zone [1 2] 2))
+    (to-string-array
       [[1 2]
        [-1 0]
        [-1 1]
@@ -292,9 +333,10 @@
 ))
 
 (test Belt
-  (to-test-pairs lu.assertEquals
-    (: (belt 1 2 [1 2]) :to-array)
-    (mapv #(new $1)
+  (to-test-pairs lu.assertItemsEquals
+    (to-string-array
+      (belt 1 2 [1 2]))
+    (to-string-array
       [[-1 0]
        [-1 1]
        [-1 2]
@@ -307,4 +349,19 @@
        [3 2]
        [3 3]
        [3 4]])
+))
+
+(test CollectionNeighbors
+  (to-test-pairs lu.assertItemsEquals
+    (to-string-array
+      (collection-neighbors [[0 1] [1 2]]))
+    (to-string-array
+      [[0 2]
+       [1 3]
+       [2 3]
+       [2 2]
+       [1 1]
+       [0 0]
+       [-1 0]
+       [-1 1]])
 ))
