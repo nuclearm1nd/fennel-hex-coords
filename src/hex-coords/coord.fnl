@@ -1,3 +1,7 @@
+(local
+  {: idiv
+   } (require :generic.math))
+
 (local coord-index {})
 (local coord-proxy {})
 
@@ -42,9 +46,6 @@
             "expected a number in second position")
           (get-or-add! t ?r))
       _ (error ("Bad arguments to new coordinate")))))
-
-(local idiv
-  #(math.floor (/ $1 $2)))
 
 (lambda to-axial [[x y] ?origin]
   (let [[x0 y0] (or ?origin [0 0])

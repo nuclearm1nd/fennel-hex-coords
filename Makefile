@@ -1,11 +1,18 @@
+define uniq =
+  $(eval seen :=)
+  $(foreach _,$1,$(if $(filter $_,${seen}),,$(eval seen += $_)))
+  ${seen}
+endef
+
 .PHONY: install-deps uninstall-deps compile compile-test clean clean-lua clean-test test
+
 CURRENT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 ROCKS := .luamodules
-MODULES := src
+MODULES := src lib
 TST_MACRO_DIR := test/macros/*.fnl
 SRCS := $(foreach sdir,${MODULES},$(wildcard ${sdir}/*/*.fnl))
-OUTS := $(patsubst src/%.fnl,out/%.lua,${SRCS})
-OUT_DIRS := $(dir ${OUTS})
+OUTS := $(patsubst lib/%.fnl,out/%.lua,$(patsubst src/%.fnl,out/%.lua,$(foreach f,${SRCS},$(if $(findstring macro,$f),,$f))))
+OUT_DIRS := $(call uniq,$(dir ${OUTS}))
 TST_SRCS := $(wildcard test/*.fnl)
 TST_OUTS := $(TST_SRCS:test/%.fnl=test-out/%.lua)
 
@@ -29,8 +36,11 @@ ${OUT_DIRS}:
 test-out:
 	mkdir -pv test-out
 
-${OUTS}: ${SRCS}
-	fennel --compile $< > $@
+out/generic/%.lua: lib/generic/%.fnl
+	fennel --add-fennel-path "${CURRENT_DIR}lib/?.fnl;;" --compile $< > $@
+
+out/hex-coords/%.lua: src/hex-coords/%.fnl
+	fennel --add-fennel-path "${CURRENT_DIR}lib/?.fnl;${CURRENT_DIR}src/?.fnl;;" --add-macro-path "${CURRENT_DIR}lib/?.fnl;${CURRENT_DIR}src/?.fnl;;" --compile $< > $@
 
 test-out/%.lua: test/%.fnl
 	fennel --add-macro-path ${TST_MACRO_DIR} --compile $< > $@
