@@ -12,7 +12,7 @@
    : to-new-origin
    : symmetric
    : distance
-   } (require :hex-coord.coord))
+   } (require :hex-coords.coord))
 
 (test NewValidation
   (lu.assertError #(new 0))

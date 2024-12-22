@@ -1,5 +1,3 @@
 .luamodules/*
-modules/
-lua/*
-hex-coord/*
-test-lua/*
+out/*
+test-out/*

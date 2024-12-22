@@ -1,21 +1,19 @@
-.PHONY: install-deps uninstall-deps compile compile-test clean clean-lua clean-test test install
-SRC_DIR := fnl
-OUT_DIR := hex-coord
-TST_DIR := test
-TST_MACRO_DIR := ${TST_DIR}/macros/*.fnl
-TST_OUT_DIR := test-lua
-ROCKS := .luamodules
-MODULES := modules
-SRCS := $(wildcard ${SRC_DIR}/*.fnl)
-OUTS := $(SRCS:${SRC_DIR}/%.fnl=${OUT_DIR}/%.lua)
-TST_SRCS := $(wildcard ${TST_DIR}/*.fnl)
-TST_OUTS := $(TST_SRCS:${TST_DIR}/%.fnl=${TST_OUT_DIR}/%.lua)
+.PHONY: install-deps uninstall-deps compile compile-test clean clean-lua clean-test test
 CURRENT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+ROCKS := .luamodules
+MODULES := src
+TST_MACRO_DIR := test/macros/*.fnl
+SRCS := $(foreach sdir,${MODULES},$(wildcard ${sdir}/*/*.fnl))
+OUTS := $(patsubst src/%.fnl,out/%.lua,${SRCS})
+OUT_DIRS := $(dir ${OUTS})
+TST_SRCS := $(wildcard test/*.fnl)
+TST_OUTS := $(TST_SRCS:test/%.fnl=test-out/%.lua)
+
 LUA_CMD ?= lua
 
-export LUA_PATH="${CURRENT_DIR}?/?.lua;${CURRENT_DIR}${ROCKS}/share/lua/5.4/?.lua;${CURRENT_DIR}${MODULES}/?.lua;;"
+export LUA_PATH="${CURRENT_DIR}?/?.lua;${CURRENT_DIR}${ROCKS}/share/lua/5.4/?.lua;${CURRENT_DIR}out/?.lua;;"
 
-compile: ${ROCKS} ${OUT_DIR} ${OUTS}
+compile: ${ROCKS} ${OUT_DIRS} ${OUTS}
 
 install-deps: ${ROCKS}
 
@@ -25,35 +23,27 @@ ${ROCKS}:
 uninstall-deps:
 	rm -rfv .luamodules
 
-${OUT_DIR}:
-	mkdir -pv ${OUT_DIR}
+${OUT_DIRS}:
+	@mkdir -p $@
 
-${TST_OUT_DIR}:
-	mkdir -pv ${TST_OUT_DIR}
+test-out:
+	mkdir -pv test-out
 
-${OUT_DIR}/%.lua: ${SRC_DIR}/%.fnl
+${OUTS}: ${SRCS}
 	fennel --compile $< > $@
 
-${TST_OUT_DIR}/%.lua: ${TST_DIR}/%.fnl
+test-out/%.lua: test/%.fnl
 	fennel --add-macro-path ${TST_MACRO_DIR} --compile $< > $@
 
-compile-test: ${TST_OUT_DIR} ${TST_OUTS}
+compile-test: test-out ${TST_OUTS}
 
 test: compile compile-test
-	@${LUA_CMD} ${TST_OUT_DIR}/main_test.lua
+	@${LUA_CMD} test-out/main_test.lua
 
 clean-lua:
-	rm -rfv ${OUT_DIR}
+	rm -rfv out
 
 clean-test:
-	rm -rfv ${TST_OUT_DIR}
+	rm -rfv test-out
 
 clean: clean-lua clean-test
-
-install:
-ifndef DESTDIR
-	@echo "DESTDIR is not defined"
-endif
-ifdef DESTDIR
-	cp -r ${OUT_DIR} $(DESTDIR)
-endif
