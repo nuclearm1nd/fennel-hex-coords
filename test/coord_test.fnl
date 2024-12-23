@@ -24,6 +24,7 @@
    : zone
    : belt
    : collection-neighbors
+   : line-distance
    } (require :hex-coords.coord))
 
 (lambda to-string-array [t]
@@ -364,4 +365,91 @@
        [0 0]
        [-1 0]
        [-1 1]])
+))
+
+(test LineDistance
+  (to-test-pairs lu.assertEquals
+    (line-distance [:horizontal 0] [0 0])
+    0
+
+    (line-distance [:horizontal 0] [2 1])
+    0
+
+    (line-distance [:horizontal 0] [4 2])
+    0
+
+    (line-distance [:horizontal 0] [3 2])
+    1
+
+    (line-distance [:horizontal 1] [1 1])
+    0
+
+    (line-distance [:horizontal 1] [-1 0])
+    0
+
+    (line-distance [:horizontal 1] [-3 -1])
+    0
+
+    (line-distance [:horizontal 1] [0 0])
+    -1
+
+    (line-distance [:horizontal 1] [0 3])
+    3
+
+    (line-distance [:- 1] [1 3])
+    2
+
+    (line-distance [:- -3] [2 4])
+    5
+
+    (line-distance [:- 4] [-1 -2])
+    -4
+
+    (line-distance [:- 3] [4 2])
+    -2
+
+    (line-distance [:- 2] [4 2])
+    -1
+
+    (line-distance [:- -5] [4 5])
+    6
+
+    (line-distance [:vertical 0] [0 0])
+    0
+
+    (line-distance [:| 0] [0 5])
+    0
+
+    (line-distance [:| 0] [3 5])
+    3
+
+    (line-distance [:| 0] [-3 -2])
+    -3
+
+    (line-distance [:incline-right 0] [0 0])
+    0
+
+    (line-distance [:/ 0] [3 1])
+    1
+
+    (line-distance [:/ 0] [-2 1])
+    1
+
+    (line-distance [:/ 0] [-2 -3])
+    -3
+
+    (line-distance [:/ -2] [3 4])
+    6
+
+    (line-distance [:/ -2] [3 -4])
+    -2
+
+    (line-distance [:incline-left 0] [0 0])
+    0
+
+    (line-distance [:incline-left 0] [-2 0])
+    -2
+
+    (line-distance [:\ 2] [4 1])
+    1
 ))

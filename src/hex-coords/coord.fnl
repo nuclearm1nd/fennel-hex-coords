@@ -1,5 +1,8 @@
+(import-macros {: in?} :generic.macros)
+
 (local
   {: idiv
+   : sign
    } (require :generic.math))
 
 (local
@@ -145,6 +148,22 @@
         (nhbrs:add! crd)))
     (nhbrs:difference! coll)))
 
+(lambda line-distance [[line-type constant] [q r]]
+  (if
+    (in? line-type :horizontal :-)
+      (let [x (- (* 2 r) q constant)]
+        (* (sign x)
+           (-> (math.abs x) (+ 1) (idiv 2))))
+
+    (in? line-type :vertical :|)
+      (- q constant)
+
+    (in? line-type :incline-right :/)
+      (- r constant)
+
+    (in? line-type :incline-left :\)
+      (- q r constant)))
+
 {
  : new
  : is-crd?
@@ -159,4 +178,5 @@
  : zone
  : belt
  : collection-neighbors
+ : line-distance
  }
