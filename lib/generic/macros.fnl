@@ -49,7 +49,7 @@
           (. sublist i))))
     lst))
 
-(lambda in [v ...]
+(lambda in? [v ...]
   (let [vals [...]]
    `(let [val# ,v]
       (or
@@ -128,7 +128,7 @@
        (let [,g ,res]
          (lua ,(.. "return " (tostring g)))))))
 
-{: in
+{: in?
  : <<-
  : as->
  : cond->
