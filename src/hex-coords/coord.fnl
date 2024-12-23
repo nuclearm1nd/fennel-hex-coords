@@ -164,6 +164,44 @@
     (in? line-type :incline-left :\)
       (- q r constant)))
 
+(lambda line-distance-constraint [line-def dist-fn]
+  (lambda [crd]
+    (dist-fn (line-distance line-def crd))))
+
+(lambda line-constraint [[line-type constant] direction ?inclusive]
+  (let [inclusive (or ?inclusive false)
+        gt0 (if inclusive #(>= $ 0) #(> $ 0))
+        lt0 (if inclusive #(<= $ 0) #(< $ 0))
+        gen (partial line-distance-constraint [line-type constant])
+        err #(error
+               (string.format "invalid line-type/distance combo %s %s"
+                              line-type
+                              direction))]
+    (case direction
+      :on (gen #(= $ 0))
+      :+ (gen gt0)
+      :- (gen lt0)
+      :below (if (in? line-type :incline-left :\)
+                   (gen lt0)
+                 (in? line-type :incline-right :/ :horizontal :-)
+                   (gen gt0)
+                 (err))
+      :above (if (in? line-type :\ :incline-left)
+                   (gen gt0)
+                 (in? line-type :incline-right :/ :horizontal :-)
+                   (gen lt0)
+                 (err))
+      :right (if (in? line-type :vertical :|
+                                :incline-left :\
+                                :incline-right :/)
+                   (gen gt0)
+                   (err))
+      :left  (if (in? line-type :vertical :|
+                                :incline-left :\
+                                :incline-right :/)
+                   (gen lt0)
+                   (err)))))
+
 {
  : new
  : is-crd?
@@ -179,4 +217,6 @@
  : belt
  : collection-neighbors
  : line-distance
+ : line-distance-constraint
+ : line-constraint
  }

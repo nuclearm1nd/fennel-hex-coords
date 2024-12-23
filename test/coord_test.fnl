@@ -25,6 +25,7 @@
    : belt
    : collection-neighbors
    : line-distance
+   : line-constraint
    } (require :hex-coords.coord))
 
 (lambda to-string-array [t]
@@ -453,3 +454,94 @@
     (line-distance [:\ 2] [4 1])
     1
 ))
+
+(test LineConstraint
+  (lu.assertError #(line-constraint [:- 0] :right))
+  (lu.assertError #(line-constraint [:horizontal 0] :left))
+
+  (lu.assertError #(line-constraint [:vertical 0] :below))
+  (lu.assertError #(line-constraint [:| 0] :above))
+
+  (let [constraint (line-constraint [:- -1] :below)]
+    (to-test-pairs lu.assertEquals
+      (constraint [0 0])
+      true
+
+      (constraint [1 0])
+      false
+
+      (constraint [5 3])
+      true
+
+      (constraint [5 2])
+      false))
+
+  (let [constraint (line-constraint [:| -1] :right)]
+    (to-test-pairs lu.assertEquals
+      (constraint [0 0])
+      true
+
+      (constraint [1 0])
+      true
+
+      (constraint [-2 3])
+      false
+
+      (constraint [-1 -5])
+      false))
+
+  (let [constraint (line-constraint [:/ 1] :below)]
+    (to-test-pairs lu.assertEquals
+      (constraint [0 0])
+      false
+
+      (constraint [1 0])
+      false
+
+      (constraint [-2 3])
+      true
+
+      (constraint [-4 1])
+      false))
+
+  (let [constraint (line-constraint [:/ 1] :right)]
+    (to-test-pairs lu.assertEquals
+      (constraint [0 0])
+      false
+
+      (constraint [1 0])
+      false
+
+      (constraint [-2 3])
+      true
+
+      (constraint [-4 1])
+      false))
+
+  (let [constraint (line-constraint [:\ 1] :right)]
+    (to-test-pairs lu.assertEquals
+      (constraint [0 0])
+      false
+
+      (constraint [4 2])
+      true
+
+      (constraint [4 3])
+      false))
+
+  (let [constraint (line-constraint [:\ 1] :below)]
+    (to-test-pairs lu.assertEquals
+      (constraint [0 0])
+      true
+
+      (constraint [4 2])
+      false
+
+      (constraint [4 3])
+      false
+
+      (constraint [4 4])
+      true
+      ))
+)
+
