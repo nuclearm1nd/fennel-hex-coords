@@ -52,7 +52,31 @@
                   (values nk (f nv nk)))))]
       (values new-iterator t0 control-var))))
 
+(lambda filter [f inner-iter]
+  (fn [tbl]
+    (let [(iterator t0 control-var) (inner-iter tbl)
+          new-iterator
+            (fn [t k]
+              (var newk nil)
+              (var newv nil)
+              (var ik k)
+              (var continue? true)
+              (while continue?
+                (let [(nk nv) (iterator t ik)]
+                  (if
+                    (= nil nv)
+                      (set continue? false)
+                    (f nv nk)
+                      (do
+                        (set newk nk)
+                        (set newv nv)
+                        (set continue? false))
+                      (set ik nk))))
+              (values newk newv))]
+      (values new-iterator t0 control-var))))
+
 {: isubseqs
  : idepth-first
  : map
+ : filter
  }
