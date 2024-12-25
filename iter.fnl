@@ -31,24 +31,24 @@
     nil
     (values indices result)))
 
-(lambda imap-iter [f]
-  (fn [tbl idx]
-    (let [next-idx (+ idx 1)
-          next-item (. tbl next-idx)]
-      (if next-item
-        (values next-idx (f next-item next-idx))
-        nil))))
-
 (lambda isubseqs [tbl]
   (values isubseqs-iter tbl []))
 
 (lambda itraverse [tbl]
   (values itraverse-iter tbl [0]))
 
-(lambda imap [f tbl]
-  (values (imap-iter f) tbl 0))
+(lambda map [f inner-iter]
+  (fn [tbl]
+    (let [(iterator t0 control-var) (inner-iter tbl)
+          new-iterator
+            (fn [t k]
+              (let [(nk nv) (iterator t k)]
+                (if (= nil nv)
+                  nil
+                  (values nk (f nv nk)))))]
+      (values new-iterator t0 control-var))))
 
 {: isubseqs
  : itraverse
- : imap
+ : map
  }

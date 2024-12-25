@@ -24,7 +24,8 @@
   (or (?. items v) false))
 
 (fn next-wrapper [t k]
-  (let [(nk _) (next t k)] nk))
+  (let [(nk _) (next t k)]
+    (values nk nk)))
 
 (fn iterator [{: items}]
   (values next-wrapper items nil))
