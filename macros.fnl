@@ -128,6 +128,15 @@
        (let [,g ,res]
          (lua ,(.. "return " (tostring g)))))))
 
+(lambda condlet [bindings ...]
+  (let [new-bindings
+          (mapv-many
+            (lambda [[name condition truthy ?falsey]]
+              [name `(if ,condition ,truthy ,?falsey)])
+            bindings)]
+    `(let ,new-bindings
+       ,...)))
+
 {: in?
  : <<-
  : as->
@@ -135,4 +144,5 @@
  : array->
  : if-not
  : early
+ : condlet
  }
