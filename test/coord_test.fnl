@@ -26,6 +26,10 @@
    : collection-neighbors
    : line-distance
    : line-constraint
+   : line-area
+   : line-area-border
+   : connecting-line
+   : constraint-difference
    } (require :hex-coords.coord))
 
 (lambda to-string-array [t]
@@ -545,3 +549,153 @@
       ))
 )
 
+(test AreaContraint
+  (let [constraint
+          (line-area
+            [:+ :-  0
+             :- :- 11
+             :+ :|  0
+             :- :|  6 ])]
+    (to-test-pairs lu.assertEquals
+      (constraint [1 1])
+      true
+
+      (constraint [5 3])
+      true
+
+      (constraint [5 7])
+      true
+
+      (constraint [1 5])
+      true
+
+      (constraint [0 1])
+      false
+
+      (constraint [6 3])
+      false
+
+      (constraint [5 8])
+      false
+
+      (constraint [1 6])
+      false)
+))
+
+(test LineAreaBorderContraint
+  (let [constraint
+          (line-area-border
+            [:+ :-  0
+             :- :- 11
+             :+ :|  0
+             :- :|  6])]
+    (to-test-pairs lu.assertEquals
+      (constraint [0 0])
+      true
+
+      (constraint [0 1])
+      true
+
+      (constraint [1 0])
+      false
+
+      (constraint [4 2])
+      true
+
+      (constraint [1 1])
+      false
+
+      (constraint [6 3])
+      true
+
+      (constraint [5 8])
+      true
+
+      (constraint [1 6])
+      true
+)))
+
+(test ConnectingLine
+  (to-test-pairs lu.assertItemsEquals
+    (to-string-array
+      (connecting-line
+        [0 0] [0 0]))
+    (to-string-array
+      [[0 0]])
+
+    (to-string-array
+      (connecting-line
+        [0 0] [1 1]))
+    (to-string-array
+      [[0 0] [1 1]])
+
+    (to-string-array
+      (connecting-line
+        [27 21] [29 22]))
+    (to-string-array
+      [[27 21] [28 22] [29 22]])
+
+    (to-string-array
+      (connecting-line
+        [0 0] [1 2]))
+    (to-string-array
+      [[0 0] [1 1] [1 2]])
+
+    (to-string-array
+      (connecting-line
+        [0 0] [6 4]))
+    (to-string-array
+      [[0 0] [1 1] [2 1] [3 2] [4 3] [5 3] [6 4]])
+
+    (to-string-array
+      (connecting-line
+        [0 0] [-4 -3]))
+    (to-string-array
+      [[0 0] [-1 -1] [-2 -1] [-3 -2] [-4 -3]])
+
+    (to-string-array
+      (connecting-line
+        [-1 -3] [1 4]))
+    (to-string-array
+      [[-1 -3] [-1 -2] [0 -1] [0 0] [0 1] [0 2] [1 3] [1 4]])
+))
+
+(test ConstraintDifference
+  (let [area1
+         (line-area
+           [:+ :-  0
+            :- :- 11
+            :+ :|  0
+            :- :|  6 ])
+        area2
+         (line-area
+           [:+ :-  3
+            :- :- 11
+            :+ :|  3
+            :- :|  6 ])
+        constraint (constraint-difference area1 area2)]
+    (to-test-pairs lu.assertEquals
+      (constraint [1 1])
+      true
+
+      (constraint [5 3])
+      true
+
+      (constraint [5 7])
+      false
+
+      (constraint [1 5])
+      true
+
+      (constraint [0 1])
+      false
+
+      (constraint [4 3])
+      true
+
+      (constraint [5 5])
+      false
+
+      (constraint [1 5])
+      true
+)))

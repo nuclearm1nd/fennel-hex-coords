@@ -3,13 +3,22 @@
 (local
   {: idiv
    : sign
+   : round
    } (require :generic.math))
 
 (local
   {: mapv
+   : partition
    } (require :generic.list))
 
+(local
+  {: f-and
+   : negate
+   } (require :generic.func))
+
 (local Set (require :generic.set))
+
+(local upack (or unpack table.unpack))
 
 (local coord-index {})
 (local coord-proxy {})
@@ -202,6 +211,51 @@
                    (gen lt0)
                    (err)))))
 
+(lambda line-segment-constraint [line-def crd-constraint]
+  (f-and
+    (line-constraint line-def :on)
+     crd-constraint))
+
+(lambda line-area [line-defs ?inclusive]
+  (->> line-defs
+       (partition 3)
+       (mapv
+         (lambda [[directon line-type constant]]
+           (line-constraint [line-type constant] directon ?inclusive)))
+       upack
+       f-and))
+
+(lambda line-area-border [line-defs]
+  (let [including (line-area line-defs true)
+        excluding (line-area line-defs false)]
+    (lambda [crd]
+      (and (including crd)
+           (not (excluding crd))))))
+
+(lambda connecting-line [[q0 r0] [q1 r1]]
+  (let [dist (distance [q0 r0] [q1 r1])
+        qstep
+          (if (= 0 dist)
+            0
+            (/ (- q1 q0) dist))
+        rstep
+          (if (= 0 dist)
+            0
+            (/ (- r1 r0) dist))]
+    (fcollect [i 0 dist 1]
+      (new (round (+ q0 (* i qstep)))
+           (round (+ r0 (* i rstep)))))))
+
+(lambda midpoint [[q0 r0] [q1 r1]]
+  [(-> (+ q0 q1) (/ 2) round)
+   (-> (+ r0 r1) (/ 2) round)])
+
+(lambda constraint-difference [constraint ...]
+  (f-and
+    constraint
+    (upack
+      (mapv negate [...]))))
+
 {
  : new
  : is-crd?
@@ -219,4 +273,10 @@
  : line-distance
  : line-distance-constraint
  : line-constraint
+ : line-segment-constraint
+ : line-area
+ : line-area-border
+ : connecting-line
+ : midpoint
+ : constraint-difference
  }
