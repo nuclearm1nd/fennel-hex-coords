@@ -2,10 +2,14 @@
   {: tget
    } (require :generic.obj))
 
-(local
-  {: inc-last!
-   : remove-last!
-   } (require :generic.list))
+(fn inc-last! [arr]
+  (let [len (length arr)
+        last (. arr len)]
+    (set (. arr len) (+ 1 last))))
+
+(fn remove-last! [arr]
+  (let [len (length arr)]
+    (set (. arr len) nil)))
 
 (fn isubseqs-iter [tbl sub-tbl]
   (let [i (length sub-tbl)]

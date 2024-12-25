@@ -1,3 +1,7 @@
+(local
+  {: idepth-first
+   } (require :generic.iter))
+
 (lambda head [tbl]
   (?. tbl 1))
 
@@ -111,6 +115,10 @@
       (set i (+ 1 i)))
     result))
 
+(lambda flatten [arr]
+  (icollect [_ v (idepth-first arr)]
+    v))
+
 {
  : head
  : tail
@@ -130,4 +138,5 @@
  : first
  : first-index
  : couples
+ : flatten
  }
