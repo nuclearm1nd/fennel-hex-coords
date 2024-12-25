@@ -1,9 +1,13 @@
+(local
+  {: flatten
+   } (require :generic.list))
+
 (lambda negate [f]
   (lambda [...]
     (not (f ...))))
 
 (lambda f-or [...]
-  (let [fns [...]]
+  (let [fns (flatten [...])]
     (lambda [...]
       (accumulate
         [res false
@@ -12,7 +16,7 @@
         (or res (f ...))))))
 
 (lambda f-and [...]
-  (let [fns [...]]
+  (let [fns (flatten [...])]
     (lambda [...]
       (accumulate
         [res true
