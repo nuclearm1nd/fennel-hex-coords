@@ -15,7 +15,7 @@
         (table.insert sub-tbl (. tbl (+ 1 i)))
         sub-tbl))))
 
-(fn itraverse-iter [tbl indices]
+(fn idepth-first-iter [tbl indices]
   (var result nil)
   (while (and (= nil result)
               (< 0 (length indices)))
@@ -34,8 +34,8 @@
 (lambda isubseqs [tbl]
   (values isubseqs-iter tbl []))
 
-(lambda itraverse [tbl]
-  (values itraverse-iter tbl [0]))
+(lambda idepth-first [tbl]
+  (values idepth-first-iter tbl [0]))
 
 (lambda map [f inner-iter]
   (fn [tbl]
@@ -49,6 +49,6 @@
       (values new-iterator t0 control-var))))
 
 {: isubseqs
- : itraverse
+ : idepth-first
  : map
  }
