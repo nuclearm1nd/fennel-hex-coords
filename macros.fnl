@@ -9,8 +9,8 @@
 (local
   {: inc-last!
    : remove-last!
-   : mapv
-   : mapv-many
+   :map mapv
+   :map-many mapv-many
    : reverse
    : partition
    : combine
