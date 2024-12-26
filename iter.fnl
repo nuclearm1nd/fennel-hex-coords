@@ -47,7 +47,7 @@
           new-iterator
             (fn [t k]
               (let [(nk nv) (iterator t k)]
-                (if (or (= nil nk) (= nil nv))
+                (if (= nil nk)
                   nil
                   (values nk (f nv nk)))))]
       (values new-iterator t0 control-var))))
@@ -60,7 +60,7 @@
          (fn new-iter [t k]
            (let [(nk nv) (iterator t k)]
              (if
-               (or (= nil nk) (= nil nv))
+               (= nil nk)
                  nil
                (f nv nk)
                  (values nk nv)
@@ -101,7 +101,7 @@
              (if (< n i1)
                nil
                (let [(nk nv) (iterator t k)]
-                 (if (or (= nil nk) (= nil nv))
+                 (if (= nil nk)
                    nil
                    (values [i1 nk] nv))))))]
       (values new-iterator t0 new-control-var))))
@@ -115,7 +115,7 @@
          (fn new-iter [t [i k]]
            (let [(nk nv) (iterator t k)]
              (if
-               (or (= nil nk) (= nil nv))
+               (= nil nk)
                  nil
                (<= n i)
                  (values [(+ 1 i) nk] nv)
@@ -130,7 +130,7 @@
          (fn [t k]
            (let [(nk nv) (iterator t k)]
              (if
-               (or (= nil nk) (= nil nv))
+               (= nil nk)
                  nil
                (f nv nk)
                  (values nk nv)
@@ -146,7 +146,7 @@
          (fn new-iter [t [flag k]]
            (let [(nk nv) (iterator t k)]
              (if
-               (or (= nil nk) (= nil nv))
+               (= nil nk)
                  nil
                (or flag
                    (not (f nv nk)))
