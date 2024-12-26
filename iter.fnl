@@ -42,8 +42,8 @@
   (values idepth-first-iter tbl [0]))
 
 (lambda map [f inner-iter]
-  (fn [tbl]
-    (let [(iterator t0 control-var) (inner-iter tbl)
+  (fn [...]
+    (let [(iterator t0 control-var) (inner-iter ...)
           new-iterator
             (fn [t k]
               (let [(nk nv) (iterator t k)]
@@ -53,8 +53,8 @@
       (values new-iterator t0 control-var))))
 
 (lambda filter [f inner-iter]
-  (fn [tbl]
-    (let [(iterator t0 control-var) (inner-iter tbl)
+  (fn [...]
+    (let [(iterator t0 control-var) (inner-iter ...)
           new-iterator
             (fn [t k]
               (var newk nil)
@@ -98,9 +98,26 @@
       [start end step]
       (- start step))))
 
+(lambda take [n inner-iter]
+  (fn [...]
+    (let
+      [(iterator t0 control-var) (inner-iter ...)
+       new-control-var [0 control-var]
+       new-iterator
+         (fn [t [i k]]
+           (let [i1 (+ i 1)]
+             (if (< n i1)
+               nil
+               (let [(nk nv) (iterator t k)]
+                 (if (= nil nv)
+                   nil
+                   (values [i1 nk] nv))))))]
+      (values new-iterator t0 new-control-var))))
+
 {: isubseqs
  : idepth-first
  : map
  : filter
  : range
+ : take
  }
