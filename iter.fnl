@@ -75,8 +75,32 @@
               (values newk newv))]
       (values new-iterator t0 control-var))))
 
+(lambda range-iter [[start end step] x]
+  (if
+    (= step 0)
+      (when (~= start end) x)
+    (let [x1 (+ x step)]
+      (if (or (and (< 0 step) (<= x1 end))
+              (and (> 0 step) (>= x1 end)))
+        (values x1 x1)
+        nil))))
+
+(lambda range [...]
+  (let
+    [(start end step)
+       (case (values (select :# ...) ...)
+         (0) (values 1 (/ 1 0) 1)
+         (1 ?end) (values 1 ?end 1)
+         (2 ?start ?end) (values ?start ?end 1)
+         _ ...)]
+    (values
+      range-iter
+      [start end step]
+      (- start step))))
+
 {: isubseqs
  : idepth-first
  : map
  : filter
+ : range
  }
