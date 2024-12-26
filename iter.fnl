@@ -47,7 +47,7 @@
           new-iterator
             (fn [t k]
               (let [(nk nv) (iterator t k)]
-                (if (= nil nv)
+                (if (or (= nil nk) (= nil nv))
                   nil
                   (values nk (f nv nk)))))]
       (values new-iterator t0 control-var))))
@@ -60,7 +60,7 @@
          (fn new-iter [t k]
            (let [(nk nv) (iterator t k)]
              (if
-               (= nil nv)
+               (or (= nil nk) (= nil nv))
                  nil
                (f nv nk)
                  (values nk nv)
@@ -101,7 +101,7 @@
              (if (< n i1)
                nil
                (let [(nk nv) (iterator t k)]
-                 (if (= nil nv)
+                 (if (or (= nil nk) (= nil nv))
                    nil
                    (values [i1 nk] nv))))))]
       (values new-iterator t0 new-control-var))))
@@ -122,6 +122,21 @@
                (tail! (new-iter t [(+ 1 i) nk])))))]
       (values new-iterator t0 new-control-var))))
 
+(lambda take-while [f inner-iter]
+  (fn [...]
+    (let
+      [(iterator t0 control-var) (inner-iter ...)
+       new-iterator
+         (fn [t k]
+           (let [(nk nv) (iterator t k)]
+             (if
+               (or (= nil nk) (= nil nv))
+                 nil
+               (f nv nk)
+                 (values nk nv)
+               nil)))]
+      (values new-iterator t0 control-var))))
+
 {: isubseqs
  : idepth-first
  : map
@@ -129,4 +144,5 @@
  : range
  : take
  : drop
+ : take-while
  }
