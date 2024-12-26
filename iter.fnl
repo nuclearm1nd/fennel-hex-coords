@@ -137,6 +137,23 @@
                nil)))]
       (values new-iterator t0 control-var))))
 
+(lambda drop-while [f inner-iter]
+  (fn [...]
+    (let
+      [(iterator t0 control-var) (inner-iter ...)
+       new-control-var [false control-var]
+       new-iterator
+         (fn new-iter [t [flag k]]
+           (let [(nk nv) (iterator t k)]
+             (if
+               (or (= nil nk) (= nil nv))
+                 nil
+               (or flag
+                   (not (f nv nk)))
+                 (values [true nk] nv)
+               (tail! (new-iter t [false nk])))))]
+      (values new-iterator t0 new-control-var))))
+
 {: isubseqs
  : idepth-first
  : map
@@ -145,4 +162,5 @@
  : take
  : drop
  : take-while
+ : drop-while
  }
