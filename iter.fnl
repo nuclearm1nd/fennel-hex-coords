@@ -114,10 +114,42 @@
                    (values [i1 nk] nv))))))]
       (values new-iterator t0 new-control-var))))
 
+(lambda drop [n inner-iter]
+  (fn [...]
+    (let
+      [(iterator t0 control-var) (inner-iter ...)
+       new-control-var [0 control-var]
+       new-iterator
+         (fn [t [i k]]
+           (var newk nil)
+           (var newv nil)
+           (var i1 (+ 1 i))
+           (var k1 k)
+           (var continue? true)
+           (while continue?
+             (let [(nk nv) (iterator t k1)]
+               (if
+                 (or (= nil nv)
+                     (= nil nk))
+                   (set continue? false)
+                 (< n i1)
+                   (do
+                     (set continue? false)
+                     (set newk nk)
+                     (set newv nv))
+                 (do
+                   (set k1 nk)
+                   (set i1 (+ 1 i1))))))
+           (if (= nil newv)
+             nil
+             (values [i1 newk] newv)))]
+      (values new-iterator t0 new-control-var))))
+
 {: isubseqs
  : idepth-first
  : map
  : filter
  : range
  : take
+ : drop
  }
