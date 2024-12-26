@@ -54,25 +54,17 @@
 
 (lambda filter [f inner-iter]
   (fn [...]
-    (let [(iterator t0 control-var) (inner-iter ...)
-          new-iterator
-            (fn [t k]
-              (var newk nil)
-              (var newv nil)
-              (var ik k)
-              (var continue? true)
-              (while continue?
-                (let [(nk nv) (iterator t ik)]
-                  (if
-                    (= nil nv)
-                      (set continue? false)
-                    (f nv nk)
-                      (do
-                        (set newk nk)
-                        (set newv nv)
-                        (set continue? false))
-                      (set ik nk))))
-              (values newk newv))]
+    (let
+      [(iterator t0 control-var) (inner-iter ...)
+       new-iterator
+         (fn new-iter [t k]
+           (let [(nk nv) (iterator t k)]
+             (if
+               (= nil nv)
+                 nil
+               (f nv nk)
+                 (values nk nv)
+               (tail! (new-iter t nk)))))]
       (values new-iterator t0 control-var))))
 
 (lambda range-iter [[start end step] x]
@@ -120,29 +112,14 @@
       [(iterator t0 control-var) (inner-iter ...)
        new-control-var [0 control-var]
        new-iterator
-         (fn [t [i k]]
-           (var newk nil)
-           (var newv nil)
-           (var i1 (+ 1 i))
-           (var k1 k)
-           (var continue? true)
-           (while continue?
-             (let [(nk nv) (iterator t k1)]
-               (if
-                 (or (= nil nv)
-                     (= nil nk))
-                   (set continue? false)
-                 (< n i1)
-                   (do
-                     (set continue? false)
-                     (set newk nk)
-                     (set newv nv))
-                 (do
-                   (set k1 nk)
-                   (set i1 (+ 1 i1))))))
-           (if (= nil newv)
-             nil
-             (values [i1 newk] newv)))]
+         (fn new-iter [t [i k]]
+           (let [(nk nv) (iterator t k)]
+             (if
+               (or (= nil nk) (= nil nv))
+                 nil
+               (<= n i)
+                 (values [(+ 1 i) nk] nv)
+               (tail! (new-iter t [(+ 1 i) nk])))))]
       (values new-iterator t0 new-control-var))))
 
 {: isubseqs
