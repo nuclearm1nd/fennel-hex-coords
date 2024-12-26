@@ -154,6 +154,28 @@
                (tail! (new-iter t [false nk])))))]
       (values new-iterator t0 new-control-var))))
 
+(lambda map-many [f inner-iter]
+  (fn [...]
+    (let
+      [(iterator t0 control-var) (inner-iter ...)
+       new-control-var [control-var]
+       new-iterator
+         (fn new-iter [t [k ?nested]]
+           (if (~= nil ?nested)
+             (let [[it tt ik] ?nested
+                   (nk nv) (it tt ik)]
+               (if (~= nil nk)
+                 (values [k [it tt nk]] nv)
+                 (tail! (new-iter t [k]))))
+             (let [(nk nv) (iterator t k)]
+               (if (= nil nk)
+                 nil
+                 (let [newv (f nv nk)]
+                   (if (= :table (type newv))
+                     (tail! (new-iter t [nk [(ipairs newv)]]))
+                     (values [nk] newv)))))))]
+      (values new-iterator t0 new-control-var))))
+
 {: isubseqs
  : idepth-first
  : map
@@ -163,4 +185,5 @@
  : drop
  : take-while
  : drop-while
+ : map-many
  }
