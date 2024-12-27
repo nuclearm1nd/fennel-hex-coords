@@ -24,7 +24,23 @@
          &until (not res)]
         (and res (f ...))))))
 
+(lambda compose [...]
+  (let
+    [fns (flatten [...])
+     len (length fns)
+     result
+       (fn inner [i ...]
+         (if (< len i)
+           ...
+           (tail!
+             (inner
+               (+ 1 i)
+               ((. fns i) ...)))))]
+    (lambda [...]
+      (result 1 ...))))
+
 {: negate
  : f-or
  : f-and
+ : compose
  }
