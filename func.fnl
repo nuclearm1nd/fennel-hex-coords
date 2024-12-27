@@ -52,9 +52,15 @@
     (lambda [...]
       (result 1 ...))))
 
+(lambda parallel-combine [g h f]
+  (lambda [...]
+    (f (g ...)
+       (h ...))))
+
 {: negate
  : f-or
  : f-and
  : compose
  : iterate
+ : parallel-combine
  }
