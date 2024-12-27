@@ -39,8 +39,22 @@
     (lambda [...]
       (result 1 ...))))
 
+(lambda iterate [n f]
+  (let
+    [result
+       (fn inner [i ...]
+         (if (< n i)
+           ...
+           (tail!
+             (inner
+               (+ 1 i)
+               (f ...)))))]
+    (lambda [...]
+      (result 1 ...))))
+
 {: negate
  : f-or
  : f-and
  : compose
+ : iterate
  }
