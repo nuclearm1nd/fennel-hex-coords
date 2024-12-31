@@ -7,7 +7,7 @@
    } (require :generic.math))
 
 (local
-  {: mapv
+  {:map mapv
    : partition
    } (require :generic.list))
 

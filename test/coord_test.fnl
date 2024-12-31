@@ -6,7 +6,7 @@
 (local lu (require :luaunit))
 
 (local
-  {: mapv
+  {:map mapv
    } (require :generic.list))
 
 (local Set (require :generic.set))
