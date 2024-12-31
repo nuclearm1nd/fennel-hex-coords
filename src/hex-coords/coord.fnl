@@ -18,7 +18,7 @@
 
 (local Set (require :generic.set))
 
-(local upack (or unpack table.unpack))
+(local upack (or _G.unpack table.unpack))
 
 (local coord-index {})
 (local coord-proxy {})

@@ -1,6 +1,6 @@
 (local lu (require :luaunit))
 
-(local CoordTest (require :test-out.coord_test))
+(local CoordTest (require :test.coord_test))
 
 (os.exit
   (do
