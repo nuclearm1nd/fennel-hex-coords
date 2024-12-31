@@ -30,7 +30,7 @@
    : line-area-border
    : connecting-line
    : constraint-difference
-   } (require :hex-coords.coord))
+   } (require :maps.hex2d))
 
 (lambda to-string-array [t]
   (if (Set.is-set? t)

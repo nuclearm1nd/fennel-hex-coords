@@ -1,6 +1,6 @@
 (local lu (require :luaunit))
 
-(local CoordTest (require :test.coord_test))
+(local Hex2dTest (require :test.hex2d_test))
 
 (os.exit
   (do
