@@ -1,3 +1,7 @@
+(local
+  {: idepth-first
+   } (require :generic.iter))
+
 (lambda head [tbl]
   (?. tbl 1))
 
@@ -16,11 +20,11 @@
   (let [len (length arr)]
     (set (. arr len) nil)))
 
-(lambda mapv [func arr]
+(lambda map [func arr]
   (icollect [i v (ipairs arr)]
     (func v i)))
 
-(lambda mapv-many [f coll]
+(lambda map-many [f coll]
   (let [result []]
     (each [i v (ipairs coll)]
       (each [_ inner (ipairs (f v i))]
@@ -111,14 +115,18 @@
       (set i (+ 1 i)))
     result))
 
+(lambda flatten [arr]
+  (icollect [_ v (idepth-first arr)]
+    v))
+
 {
  : head
  : tail
  : nth
  : inc-last!
  : remove-last!
- : mapv
- : mapv-many
+ : map
+ : map-many
  : filter
  : remove-at-idx
  : reduce
@@ -130,4 +138,5 @@
  : first
  : first-index
  : couples
+ : flatten
  }

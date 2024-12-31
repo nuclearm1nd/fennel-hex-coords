@@ -9,10 +9,12 @@
 (local
   {: inc-last!
    : remove-last!
-   : mapv
-   : mapv-many
+   :map mapv
+   :map-many mapv-many
    : reverse
    : partition
+   : combine
+   : filter
    } (require :generic.list))
 
 (fn itraverse-iter [tbl indices]
@@ -128,6 +130,38 @@
        (let [,g ,res]
          (lua ,(.. "return " (tostring g)))))))
 
+(lambda condlet [clauses ...]
+  (let
+    [nil-clause
+      (fn [clause ?exclude]
+        (let
+          [exclude (or ?exclude [])
+           to-exclude
+             (accumulate
+               [res {}
+                _ name (ipairs exclude)]
+               (do
+                 (tset res (tostring name) true)
+                 res))]
+          (->> clause
+               (partition 2)
+               (filter
+                 (fn [[A _]]
+                   (= nil (. to-exclude (tostring A)))))
+               (mapv-many
+                 (fn [[A _]]
+                   [`,A `nil])))))]
+    (accumulate
+      [result ...
+       _ [condition t-clause ?f-clause] (ipairs (reverse clauses))]
+      (if (= nil ?f-clause)
+        `(if ,condition
+           (let ,t-clause ,result)
+           (let ,(nil-clause t-clause) ,result))
+        `(if ,condition
+           (let ,(combine t-clause  (nil-clause ?f-clause t-clause)) ,result)
+           (let ,(combine ?f-clause (nil-clause t-clause ?f-clause)) ,result))))))
+
 {: in?
  : <<-
  : as->
@@ -135,4 +169,5 @@
  : array->
  : if-not
  : early
+ : condlet
  }
