@@ -256,6 +256,17 @@
     (upack
       (mapv negate [...]))))
 
+(lambda line-collection-distance [line-defs]
+  (let [fs (->> line-defs
+                (partition 3)
+                (mapv
+                  (lambda [[_ line-type constant]]
+                    (partial line-distance [line-type constant]))))]
+    (lambda [crd]
+      (->> (mapv #(-> crd $ math.abs) fs)
+           upack
+           math.min))))
+
 {
  : new
  : is-crd?
@@ -279,4 +290,5 @@
  : connecting-line
  : midpoint
  : constraint-difference
+ : line-collection-distance
  }
